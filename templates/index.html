@@ -1,0 +1,123 @@
+\<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Steganography (AES + LSB)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#11998e; --bg2:#38ef7d; --glass: rgba(255,255,255,0.08);
+}
+*{box-sizing:border-box}
+body{
+  font-family:Inter, Arial, sans-serif;
+  margin:0; min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  padding:32px;
+  color:#fff;
+}
+.container{
+  width:100%; max-width:980px; display:grid; grid-template-columns:1fr 1fr; gap:24px;
+}
+.card{
+  background:var(--glass); padding:24px; border-radius:14px; backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+h1{grid-column:1/3; margin:0 0 6px; font-size:1.6rem}
+.lead{grid-column:1/3; opacity:0.95; margin-bottom:8px}
+.label{font-size:0.9rem; margin-top:10px; display:block; text-align:left}
+input[type="file"], input[type="text"], input[type="password"]{
+  width:100%; padding:10px 12px; margin-top:8px; border-radius:10px; border:none;
+  background: rgba(255,255,255,0.06); color: #fff;
+}
+.row{display:flex; gap:10px; align-items:center}
+.button{
+  padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:600;
+  background:#fff; color:var(--bg1);
+}
+.small{font-size:0.9rem; color:#eee}
+.pass-wrap{position:relative}
+.eye{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  cursor:pointer; user-select:none; font-size:18px; opacity:0.95;
+}
+.disable-row{display:flex; align-items:center; gap:8px; margin-top:8px}
+.footer{grid-column:1/3; text-align:center; opacity:0.95; margin-top:8px}
+@media (max-width:880px){
+  .container{grid-template-columns:1fr; padding:0}
+  h1, .lead{grid-column:auto}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Image Steganography — AES + Randomized LSB</h1>
+  <div class="lead">Embed a secret file or short message inside an image. The app always saves stego output as PNG.</div>
+
+  <div class="card">
+    <h3>Encrypt</h3>
+    <form action="/encrypt" method="post" enctype="multipart/form-data">
+      <label class="label">Cover Image (JPEG/PNG)</label>
+      <input type="file" name="cover" accept="image/*" required>
+
+      <label class="label">Secret File (optional)</label>
+      <input type="file" name="secret_file">
+
+      <label class="label">Or Secret Message</label>
+      <input type="text" name="secret_message" placeholder="Type secret message">
+
+      <label class="label">Password</label>
+      <div class="pass-wrap">
+        <input id="enc-pass" type="password" name="password" placeholder="Enter strong password" required>
+        <span id="enc-eye" class="eye" onclick="togglePass('enc-pass')">👁</span>
+      </div>
+
+      <div class="disable-row">
+        <input id="disable-eye" type="checkbox" onchange="toggleEyeDisable(this.checked)">
+        <label class="small">Disable eye icon</label>
+      </div>
+
+      <div style="margin-top:14px">
+        <button class="button" type="submit">Encrypt & Download stego.png</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Decrypt</h3>
+    <form action="/decrypt" method="post" enctype="multipart/form-data">
+      <label class="label">Stego Image (PNG)</label>
+      <input type="file" name="stego" accept="image/*" required>
+
+      <label class="label">Password</label>
+      <div class="pass-wrap">
+        <input id="dec-pass" type="password" name="password" placeholder="Enter password" required>
+        <span id="dec-eye" class="eye" onclick="togglePass('dec-pass')">👁</span>
+      </div>
+
+      <div style="margin-top:14px">
+        <button class="button" type="submit">Decrypt</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="footer small">Tip: always keep the original cover image if you might re-embed or debug.</div>
+</div>
+
+<script>
+function togglePass(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.type = (el.type === "password") ? "text" : "password";
+}
+function toggleEyeDisable(disabled){
+  const encEye = document.getElementById('enc-eye');
+  const decEye = document.getElementById('dec-eye');
+  if(disabled){ encEye.style.display='none'; decEye.style.display='none'; }
+  else { encEye.style.display='inline'; decEye.style.display='inline'; }
+}
+</script>
+</body>
+</html>
